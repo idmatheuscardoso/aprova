@@ -1,0 +1,58 @@
+<!--
+  Template do e-mail "Confirm signup" do Supabase Auth.
+  Cole este HTML em: Authentication > Emails > Templates > Confirm signup > Source.
+  Requer SMTP customizado configurado (Resend) para o botão "Source" ficar disponível.
+-->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+  Confirme seu e-mail para começar a usar o Approva.
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 16px;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e4e4e7;">
+        <tr>
+          <td style="padding:32px 32px 0 32px;">
+            <span style="font-size:20px;font-weight:700;color:#171717;letter-spacing:-0.02em;">
+              Ap<span style="color:#16a34a;">p</span>rova
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px 8px 32px;">
+            <h1 style="margin:0;font-size:22px;line-height:1.3;color:#171717;">
+              Confirme seu e-mail para continuar
+            </h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 24px 32px;">
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#52525b;">
+              Oi{{ if .Data.full_name }}, {{ .Data.full_name }}{{ end }}. Falta só um passo para você começar a
+              centralizar a aprovação dos seus materiais com clientes.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 32px 32px;">
+            <a
+              href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/onboarding"
+              style="display:inline-block;background-color:#171717;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:9999px;"
+            >
+              Confirmar e-mail
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 32px 32px;border-top:1px solid #e4e4e7;">
+            <p style="margin:16px 0 0 0;font-size:13px;line-height:1.6;color:#a1a1aa;">
+              Se você não criou uma conta no Approva, pode ignorar este e-mail.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:24px 0 0 0;font-size:12px;color:#a1a1aa;">
+        Approva — Aprovação sem enrolação.
+      </p>
+    </td>
+  </tr>
+</table>
