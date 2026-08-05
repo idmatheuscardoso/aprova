@@ -65,8 +65,13 @@ export default async function ProjetoPage({
           {pastas && pastas.length > 0 ? (
             <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
               {pastas.map((pasta) => (
-                <li key={pasta.id} className="px-4 py-3">
-                  {pasta.name}
+                <li key={pasta.id}>
+                  <Link
+                    href={`/workspace/${workspaceId}/projeto/${projetoId}/pasta/${pasta.id}`}
+                    className="block px-4 py-3 hover:bg-border/30"
+                  >
+                    {pasta.name}
+                  </Link>
                 </li>
               ))}
             </ul>
