@@ -1,30 +1,24 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Check, MessageSquare } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { FieldError } from "@/components/ui/field";
 import { AssetStatusBadge, type AssetStatus } from "@/components/asset-status-badge";
-import { aprovarAsset, pedirAjusteAsset, type PedirAjusteState } from "./actions";
+import { aprovarAsset } from "./actions";
+import { useRevisor } from "./revisor";
 
 export function AssetApprovalActions({
   token,
   assetId,
   status,
-  feedback,
+  decisao,
 }: {
   token: string;
   assetId: string;
   status: AssetStatus;
-  feedback: string | null;
+  decisao: string | null;
 }) {
-  const [mostrarForm, setMostrarForm] = useState(false);
+  const { revisor, carregado } = useRevisor();
   const aprovar = aprovarAsset.bind(null, token, assetId);
-  const [state, pedirAjuste] = useActionState<PedirAjusteState, FormData>(
-    pedirAjusteAsset.bind(null, token, assetId),
-    undefined,
-  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -32,9 +26,12 @@ export function AssetApprovalActions({
         <AssetStatusBadge status={status} />
 
         <form action={aprovar}>
+          <input type="hidden" name="revisor_nome" value={revisor?.nome ?? ""} />
+          <input type="hidden" name="revisor_email" value={revisor?.email ?? ""} />
           <Button
             type="submit"
             size="sm"
+            disabled={!carregado || revisor === null}
             variant={status === "aprovado" ? undefined : "outline"}
             className={
               status === "aprovado"
@@ -45,36 +42,17 @@ export function AssetApprovalActions({
             <Check /> Aprovar
           </Button>
         </form>
-
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => setMostrarForm((valor) => !valor)}
-        >
-          <MessageSquare /> Pedir ajuste
-        </Button>
       </div>
 
-      {mostrarForm && (
-        <form action={pedirAjuste} className="flex flex-col gap-2">
-          <Textarea
-            name="feedback"
-            defaultValue={feedback ?? ""}
-            placeholder="O que precisa mudar?"
-            required
-          />
-          <FieldError>{state?.error}</FieldError>
-          <div>
-            <Button type="submit" size="sm">
-              Enviar
-            </Button>
-          </div>
-        </form>
+      {carregado && !revisor && (
+        <p className="text-sm text-muted-foreground">
+          Preencha seu nome acima para aprovar. Para pedir ajuste, abra o arquivo
+          em &ldquo;Revisar&rdquo;.
+        </p>
       )}
 
-      {!mostrarForm && status === "ajuste_solicitado" && feedback && (
-        <p className="text-sm text-muted-foreground">{feedback}</p>
+      {status !== "pendente" && decisao && (
+        <p className="text-sm text-muted-foreground">{decisao}</p>
       )}
     </div>
   );

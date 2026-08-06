@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { FileText, Link2Off } from "lucide-react";
+import Link from "next/link";
+import { FileText } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Logo } from "@/components/logo";
 import {
   Empty,
   EmptyDescription,
@@ -20,7 +20,10 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Button } from "@/components/ui/button";
+import { formatarDataHora } from "@/lib/datas";
+import { LinkInvalido } from "./link-invalido";
 import { AssetApprovalActions } from "./asset-approval-actions";
+import { RevisorCard } from "./revisor";
 
 function formatarTamanho(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -28,28 +31,10 @@ function formatarTamanho(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function LinkInvalido() {
-  return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center border-b px-6 py-4 sm:px-10">
-        <Logo className="text-xl" />
-      </header>
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-6 py-12">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Link2Off />
-            </EmptyMedia>
-            <EmptyTitle>Link inválido</EmptyTitle>
-            <EmptyDescription>
-              Este link de aprovação não existe mais. Peça um novo link para
-              quem enviou os materiais.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </main>
-    </div>
-  );
+function contarComentarios(valor: unknown) {
+  if (!Array.isArray(valor)) return 0;
+  const primeiro = valor[0] as { count?: number } | undefined;
+  return primeiro?.count ?? 0;
 }
 
 export default async function AprovacaoPage({
@@ -78,7 +63,9 @@ export default async function AprovacaoPage({
       .maybeSingle(),
     supabase
       .from("assets")
-      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .select(
+        "id, name, mime_type, size_bytes, storage_path, created_at, status, decided_by_name, decided_at, comments(count)",
+      )
       .eq("folder_id", link.folder_id)
       .order("created_at", { ascending: true }),
   ]);
@@ -101,79 +88,92 @@ export default async function AprovacaoPage({
 
   const assetsComUrl = (assets ?? []).map((asset) => {
     const signed = signedUrls?.find((item) => item.path === asset.storage_path);
-    return { ...asset, url: signed?.signedUrl ?? null };
+    return {
+      ...asset,
+      url: signed?.signedUrl ?? null,
+      comentarios: contarComentarios(asset.comments),
+    };
   });
 
+  const aprovados = assetsComUrl.filter((asset) => asset.status === "aprovado").length;
+
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center border-b px-6 py-4 sm:px-10">
-        <Logo className="text-xl" />
-      </header>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-10 px-6 py-12">
+      <div>
+        {projeto?.name && (
+          <p className="text-sm text-muted-foreground">{projeto.name}</p>
+        )}
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{pasta.name}</h1>
+        {assetsComUrl.length > 0 && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {aprovados} de {assetsComUrl.length}{" "}
+            {assetsComUrl.length === 1 ? "arquivo aprovado" : "arquivos aprovados"}
+          </p>
+        )}
+      </div>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-10 px-6 py-12">
-        <div>
-          {projeto?.name && (
-            <p className="text-sm text-muted-foreground">{projeto.name}</p>
-          )}
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{pasta.name}</h1>
-        </div>
+      <RevisorCard />
 
-        <section className="flex flex-col gap-4">
-          {assetsComUrl.length > 0 ? (
-            <ItemGroup>
-              {assetsComUrl.map((asset) => (
-                <Item key={asset.id} variant="outline">
-                  {asset.mime_type.startsWith("image/") && asset.url ? (
-                    <ItemMedia variant="image">
-                      <Image src={asset.url} alt="" width={80} height={80} />
-                    </ItemMedia>
-                  ) : (
-                    <ItemMedia variant="icon">
-                      <FileText />
-                    </ItemMedia>
-                  )}
-                  <ItemContent>
-                    <ItemTitle>{asset.name}</ItemTitle>
-                    <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
-                  </ItemContent>
-                  {asset.url && (
-                    <ItemActions>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        nativeButton={false}
-                        render={<a href={asset.url} target="_blank" rel="noreferrer" />}
-                      >
-                        Ver
-                      </Button>
-                    </ItemActions>
-                  )}
-                  <ItemFooter>
-                    <AssetApprovalActions
-                      token={token}
-                      assetId={asset.id}
-                      status={asset.status}
-                      feedback={asset.feedback}
-                    />
-                  </ItemFooter>
-                </Item>
-              ))}
-            </ItemGroup>
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <FileText />
-                </EmptyMedia>
-                <EmptyTitle>Nenhum arquivo ainda</EmptyTitle>
-                <EmptyDescription>
-                  Ainda não há materiais para revisar nesta pasta.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </section>
-      </main>
-    </div>
+      <section className="flex flex-col gap-4">
+        {assetsComUrl.length > 0 ? (
+          <ItemGroup>
+            {assetsComUrl.map((asset) => (
+              <Item key={asset.id} variant="outline">
+                {asset.mime_type.startsWith("image/") && asset.url ? (
+                  <ItemMedia variant="image">
+                    <Image src={asset.url} alt="" width={80} height={80} />
+                  </ItemMedia>
+                ) : (
+                  <ItemMedia variant="icon">
+                    <FileText />
+                  </ItemMedia>
+                )}
+                <ItemContent>
+                  <ItemTitle>{asset.name}</ItemTitle>
+                  <ItemDescription>
+                    {formatarTamanho(asset.size_bytes)}
+                    {asset.comentarios > 0 &&
+                      ` · ${asset.comentarios} ${asset.comentarios === 1 ? "comentário" : "comentários"}`}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Button
+                    size="sm"
+                    nativeButton={false}
+                    render={<Link href={`/aprovar/${token}/arquivo/${asset.id}`} />}
+                  >
+                    Revisar
+                  </Button>
+                </ItemActions>
+                <ItemFooter>
+                  <AssetApprovalActions
+                    token={token}
+                    assetId={asset.id}
+                    status={asset.status}
+                    decisao={
+                      asset.decided_by_name && asset.decided_at
+                        ? `${asset.status === "aprovado" ? "Aprovado" : "Ajuste pedido"} por ${asset.decided_by_name} em ${formatarDataHora(asset.decided_at)}`
+                        : null
+                    }
+                  />
+                </ItemFooter>
+              </Item>
+            ))}
+          </ItemGroup>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FileText />
+              </EmptyMedia>
+              <EmptyTitle>Nenhum arquivo ainda</EmptyTitle>
+              <EmptyDescription>
+                Ainda não há materiais para revisar nesta pasta.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </section>
+    </main>
   );
 }

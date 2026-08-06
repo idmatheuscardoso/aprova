@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/item";
 import { Input } from "@/components/ui/input";
 import { AssetStatusBadge } from "@/components/asset-status-badge";
+import { formatarDataHora } from "@/lib/datas";
 import { sair } from "../../../../../actions";
 import { EnviarAssetForm } from "./enviar-asset-form";
 import { gerarLinkAprovacao } from "./actions";
@@ -34,6 +35,12 @@ function formatarTamanho(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function contarComentarios(valor: unknown) {
+  if (!Array.isArray(valor)) return 0;
+  const primeiro = valor[0] as { count?: number } | undefined;
+  return primeiro?.count ?? 0;
 }
 
 export default async function PastaPage({
@@ -60,7 +67,9 @@ export default async function PastaPage({
       .single(),
     supabase
       .from("assets")
-      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .select(
+        "id, name, mime_type, size_bytes, storage_path, created_at, status, feedback, decided_by_name, decided_by_email, decided_at, comments(count)",
+      )
       .eq("folder_id", pastaId)
       .order("created_at", { ascending: true }),
     supabase
@@ -89,7 +98,11 @@ export default async function PastaPage({
 
   const assetsComUrl = (assets ?? []).map((asset) => {
     const signed = signedUrls?.find((item) => item.path === asset.storage_path);
-    return { ...asset, url: signed?.signedUrl ?? null };
+    return {
+      ...asset,
+      url: signed?.signedUrl ?? null,
+      comentarios: contarComentarios(asset.comments),
+    };
   });
 
   const gerarLinkComParametros = gerarLinkAprovacao.bind(
@@ -168,24 +181,43 @@ export default async function PastaPage({
                   )}
                   <ItemContent>
                     <ItemTitle>{asset.name}</ItemTitle>
-                    <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
+                    <ItemDescription>
+                      {formatarTamanho(asset.size_bytes)}
+                      {asset.comentarios > 0 &&
+                        ` · ${asset.comentarios} ${asset.comentarios === 1 ? "comentário" : "comentários"}`}
+                    </ItemDescription>
                   </ItemContent>
                   <ItemActions>
                     <AssetStatusBadge status={asset.status} />
-                    {asset.url && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        nativeButton={false}
-                        render={<a href={asset.url} target="_blank" rel="noreferrer" />}
-                      >
-                        Ver
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={
+                        <Link
+                          href={`/workspace/${workspaceId}/projeto/${projetoId}/pasta/${pastaId}/arquivo/${asset.id}`}
+                        />
+                      }
+                    >
+                      Abrir
+                    </Button>
                   </ItemActions>
-                  {asset.status === "ajuste_solicitado" && asset.feedback && (
+                  {(asset.decided_by_name ||
+                    (asset.status === "ajuste_solicitado" && asset.feedback)) && (
                     <ItemFooter>
-                      <p className="text-sm text-muted-foreground">{asset.feedback}</p>
+                      <div className="flex flex-col gap-1">
+                        {asset.status === "ajuste_solicitado" && asset.feedback && (
+                          <p className="text-sm text-muted-foreground">{asset.feedback}</p>
+                        )}
+                        {asset.decided_by_name && asset.decided_at && (
+                          <p className="text-sm text-muted-foreground">
+                            {asset.status === "aprovado" ? "Aprovado" : "Ajuste pedido"} por{" "}
+                            {asset.decided_by_name}
+                            {asset.decided_by_email ? ` (${asset.decided_by_email})` : ""} em{" "}
+                            {formatarDataHora(asset.decided_at)}
+                          </p>
+                        )}
+                      </div>
                     </ItemFooter>
                   )}
                 </Item>
