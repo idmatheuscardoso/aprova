@@ -103,9 +103,12 @@ access). Duas consequências práticas:
    mostrando os Assets de uma Pasta, com botão de gerar/copiar o link na
    tela da Pasta. Usa tabela `approval_links` + client Supabase com a
    chave secret/service role no servidor pra ler sem sessão de usuário.
+7. Ação de aprovar/pedir ajuste por Asset — cada Asset tem `status`
+   (pendente/aprovado/ajuste_solicitado) e `feedback`. O cliente aprova ou
+   pede ajuste com comentário na tela pública, podendo mudar de ideia
+   depois; o dono vê o status e o comentário na tela da Pasta. É aqui que
+   o estado "Aprovado" (verde) passa a ser usado de verdade.
 
 ### Próximos passos (ainda não construído, ordem sugerida)
-7. Ação de aprovar/pedir ajuste por Asset — é aqui que o estado "Aprovado"
-   (verde) passa a ser usado de verdade.
 8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste.
 9. Painel de status no Workspace (visão geral do que está aprovado/pendente).
