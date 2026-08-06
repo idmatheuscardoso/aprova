@@ -2,6 +2,11 @@
 
 import { useActionState } from "react";
 import { criarProjeto, type CriarProjetoState } from "./actions";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 
 export function CriarProjetoForm({ workspaceId }: { workspaceId: string }) {
   const criarProjetoNoWorkspace = criarProjeto.bind(null, workspaceId);
@@ -11,30 +16,27 @@ export function CriarProjetoForm({ workspaceId }: { workspaceId: string }) {
   );
 
   return (
-    <form action={formAction} className="flex w-full max-w-sm flex-col gap-3">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="nome" className="text-sm font-medium">
-          Nome do projeto
-        </label>
-        <input
-          id="nome"
-          name="nome"
-          type="text"
-          required
-          placeholder="Ex: Campanha de Verão"
-          className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-        />
-      </div>
+    <form action={formAction} className="w-full max-w-sm">
+      <FieldGroup>
+        {state?.error && (
+          <Alert
+            variant="destructive"
+            className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200 motion-safe:ease-snappy"
+          >
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        <Field>
+          <FieldLabel htmlFor="nome">Nome do projeto</FieldLabel>
+          <Input id="nome" name="nome" type="text" required placeholder="Ex: Campanha de Verão" />
+        </Field>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? "Criando..." : "Criar projeto"}
-      </button>
+        <Button type="submit" disabled={pending} className="self-start">
+          {pending && <Spinner data-icon="inline-start" />}
+          {pending ? "Criando..." : "Criar projeto"}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }

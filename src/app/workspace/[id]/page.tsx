@@ -1,7 +1,17 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { FolderKanban } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { sair } from "../actions";
 import { CriarProjetoForm } from "./criar-projeto-form";
 
@@ -42,12 +52,12 @@ export default async function WorkspacePage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
+      <header className="flex items-center justify-between border-b px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
+          <Button type="submit" variant="ghost" size="sm">
             Sair
-          </button>
+          </Button>
         </form>
       </header>
 
@@ -61,24 +71,39 @@ export default async function WorkspacePage({
           <h2 className="text-sm font-medium text-muted-foreground">Projetos</h2>
 
           {projetos && projetos.length > 0 ? (
-            <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
+            <ItemGroup>
               {projetos.map((projeto) => (
-                <li key={projeto.id}>
-                  <Link
-                    href={`/workspace/${id}/projeto/${projeto.id}`}
-                    className="block px-4 py-3 hover:bg-border/30"
-                  >
-                    {projeto.name}
-                  </Link>
-                </li>
+                <Item
+                  key={projeto.id}
+                  variant="outline"
+                  className="hover:bg-muted"
+                  render={<Link href={`/workspace/${id}/projeto/${projeto.id}`} />}
+                >
+                  <ItemMedia variant="icon">
+                    <FolderKanban />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{projeto.name}</ItemTitle>
+                  </ItemContent>
+                </Item>
               ))}
-            </ul>
+            </ItemGroup>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FolderKanban />
+                </EmptyMedia>
+                <EmptyTitle>Nenhum projeto ainda</EmptyTitle>
+                <EmptyDescription>
+                  Crie o primeiro projeto para organizar o conteúdo do seu cliente.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </section>
 
-        <section className="flex flex-col gap-4 border-t border-border pt-8">
+        <section className="flex flex-col gap-4 border-t pt-8">
           <h2 className="text-sm font-medium text-muted-foreground">Novo projeto</h2>
           <CriarProjetoForm workspaceId={id} />
         </section>
