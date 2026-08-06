@@ -52,11 +52,26 @@ export default async function WorkspacePage({
     redirect("/entrar");
   }
 
-  const { data: workspace } = await supabase
-    .from("workspaces")
-    .select("id, name, created_at, companies(name)")
-    .eq("id", id)
-    .single();
+  const [{ data: workspace }, { data: projetos }, { data: assets }] = await Promise.all([
+    supabase
+      .from("workspaces")
+      .select("id, name, created_at, companies(name)")
+      .eq("id", id)
+      .single(),
+    supabase
+      .from("projects")
+      .select("id, name, created_at")
+      .eq("workspace_id", id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("assets")
+      .select(
+        "id, name, status, folders!inner(id, name, project_id, projects!inner(id, name, workspace_id))",
+      )
+      .eq("folders.projects.workspace_id", id) as unknown as Promise<{
+      data: AssetComContexto[] | null;
+    }>,
+  ]);
 
   if (!workspace) {
     notFound();
@@ -65,19 +80,6 @@ export default async function WorkspacePage({
   const empresa = Array.isArray(workspace.companies)
     ? workspace.companies[0]
     : workspace.companies;
-
-  const { data: projetos } = await supabase
-    .from("projects")
-    .select("id, name, created_at")
-    .eq("workspace_id", id)
-    .order("created_at", { ascending: true });
-
-  const { data: assets } = (await supabase
-    .from("assets")
-    .select(
-      "id, name, status, folders!inner(id, name, project_id, projects!inner(id, name, workspace_id))",
-    )
-    .eq("folders.projects.workspace_id", id)) as { data: AssetComContexto[] | null };
 
   const contagem = { pendente: 0, aprovado: 0, ajuste_solicitado: 0 };
   for (const asset of assets ?? []) {

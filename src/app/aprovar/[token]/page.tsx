@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FileText, Link2Off } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Logo } from "@/components/logo";
@@ -69,11 +70,18 @@ export default async function AprovacaoPage({
     return <LinkInvalido />;
   }
 
-  const { data: pasta } = await supabase
-    .from("folders")
-    .select("id, name, projects(name)")
-    .eq("id", link.folder_id)
-    .maybeSingle();
+  const [{ data: pasta }, { data: assets }] = await Promise.all([
+    supabase
+      .from("folders")
+      .select("id, name, projects(name)")
+      .eq("id", link.folder_id)
+      .maybeSingle(),
+    supabase
+      .from("assets")
+      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .eq("folder_id", link.folder_id)
+      .order("created_at", { ascending: true }),
+  ]);
 
   if (!pasta) {
     return <LinkInvalido />;
@@ -81,20 +89,20 @@ export default async function AprovacaoPage({
 
   const projeto = Array.isArray(pasta.projects) ? pasta.projects[0] : pasta.projects;
 
-  const { data: assets } = await supabase
-    .from("assets")
-    .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
-    .eq("folder_id", pasta.id)
-    .order("created_at", { ascending: true });
+  const { data: signedUrls } =
+    assets && assets.length > 0
+      ? await supabase.storage
+          .from("assets")
+          .createSignedUrls(
+            assets.map((asset) => asset.storage_path),
+            3600,
+          )
+      : { data: null };
 
-  const assetsComUrl = await Promise.all(
-    (assets ?? []).map(async (asset) => {
-      const { data } = await supabase.storage
-        .from("assets")
-        .createSignedUrl(asset.storage_path, 3600);
-      return { ...asset, url: data?.signedUrl ?? null };
-    }),
-  );
+  const assetsComUrl = (assets ?? []).map((asset) => {
+    const signed = signedUrls?.find((item) => item.path === asset.storage_path);
+    return { ...asset, url: signed?.signedUrl ?? null };
+  });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -117,8 +125,7 @@ export default async function AprovacaoPage({
                 <Item key={asset.id} variant="outline">
                   {asset.mime_type.startsWith("image/") && asset.url ? (
                     <ItemMedia variant="image">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- miniatura de URL assinada dinâmica */}
-                      <img src={asset.url} alt="" />
+                      <Image src={asset.url} alt="" width={80} height={80} />
                     </ItemMedia>
                   ) : (
                     <ItemMedia variant="icon">
