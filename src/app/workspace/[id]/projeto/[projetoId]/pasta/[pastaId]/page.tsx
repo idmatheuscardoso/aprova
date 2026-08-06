@@ -59,7 +59,7 @@ export default async function PastaPage({
       <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted hover:text-foreground">
+          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
             Sair
           </button>
         </form>
@@ -69,7 +69,7 @@ export default async function PastaPage({
         <div>
           <Link
             href={`/workspace/${workspaceId}/projeto/${projetoId}`}
-            className="text-sm text-muted hover:text-foreground"
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Voltar para {projeto.name}
           </Link>
@@ -77,7 +77,7 @@ export default async function PastaPage({
         </div>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted">Arquivos</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Arquivos</h2>
 
           {assetsComUrl.length > 0 ? (
             <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
@@ -91,13 +91,13 @@ export default async function PastaPage({
                       className="h-12 w-12 rounded object-cover"
                     />
                   ) : (
-                    <span className="flex h-12 w-12 items-center justify-center rounded bg-border text-xs text-muted">
+                    <span className="flex h-12 w-12 items-center justify-center rounded bg-border text-xs text-muted-foreground">
                       PDF
                     </span>
                   )}
                   <div className="flex flex-1 flex-col">
                     <span className="text-sm">{asset.name}</span>
-                    <span className="text-xs text-muted">
+                    <span className="text-xs text-muted-foreground">
                       {formatarTamanho(asset.size_bytes)}
                     </span>
                   </div>
@@ -106,7 +106,7 @@ export default async function PastaPage({
                       href={asset.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sm text-muted hover:text-foreground"
+                      className="text-sm text-muted-foreground hover:text-foreground"
                     >
                       Ver
                     </a>
@@ -115,12 +115,12 @@ export default async function PastaPage({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted">Nenhum arquivo ainda.</p>
+            <p className="text-sm text-muted-foreground">Nenhum arquivo ainda.</p>
           )}
         </section>
 
         <section className="flex flex-col gap-4 border-t border-border pt-8">
-          <h2 className="text-sm font-medium text-muted">Enviar arquivo</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Enviar arquivo</h2>
           <EnviarAssetForm workspaceId={workspaceId} projectId={projetoId} folderId={pastaId} />
         </section>
       </main>

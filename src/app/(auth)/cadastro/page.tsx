@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -45,12 +50,14 @@ export default function CadastroPage() {
   if (confirmeEmail) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <Logo className="text-2xl" />
-        <h1 className="text-xl font-semibold">Confirme seu e-mail</h1>
-        <p className="max-w-sm text-muted">
-          Enviamos um link de confirmação para <strong>{email}</strong>. Clique
-          nele para ativar sua conta e continuar.
-        </p>
+        <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-snappy flex flex-col items-center gap-4">
+          <Logo className="text-2xl" />
+          <h1 className="text-xl font-semibold">Confirme seu e-mail</h1>
+          <p className="max-w-sm text-muted-foreground">
+            Enviamos um link de confirmação para <strong>{email}</strong>. Clique
+            nele para ativar sua conta e continuar.
+          </p>
+        </div>
       </div>
     );
   }
@@ -58,68 +65,65 @@ export default function CadastroPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
       <Logo className="text-2xl" />
-      <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
-        <h1 className="text-center text-xl font-semibold">Criar conta</h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-sm">
+        <FieldGroup>
+          <h1 className="text-center text-xl font-semibold">Criar conta</h1>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="nome" className="text-sm font-medium">
-            Nome
-          </label>
-          <input
-            id="nome"
-            type="text"
-            required
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-          />
-        </div>
+          {erro && (
+            <Alert
+              variant="destructive"
+              className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200 motion-safe:ease-snappy"
+            >
+              <AlertDescription>{erro}</AlertDescription>
+            </Alert>
+          )}
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm font-medium">
-            E-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-          />
-        </div>
+          <Field>
+            <FieldLabel htmlFor="nome">Nome</FieldLabel>
+            <Input
+              id="nome"
+              type="text"
+              required
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+            />
+          </Field>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="senha" className="text-sm font-medium">
-            Senha
-          </label>
-          <input
-            id="senha"
-            type="password"
-            required
-            minLength={6}
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-          />
-        </div>
+          <Field>
+            <FieldLabel htmlFor="email">E-mail</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
 
-        {erro && <p className="text-sm text-red-600">{erro}</p>}
+          <Field>
+            <FieldLabel htmlFor="senha">Senha</FieldLabel>
+            <Input
+              id="senha"
+              type="password"
+              required
+              minLength={6}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+          </Field>
 
-        <button
-          type="submit"
-          disabled={carregando}
-          className="mt-2 rounded-full bg-foreground px-6 py-3 font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
-        >
-          {carregando ? "Criando conta..." : "Criar conta"}
-        </button>
+          <Button type="submit" disabled={carregando} className="mt-2">
+            {carregando && <Spinner data-icon="inline-start" />}
+            {carregando ? "Criando conta..." : "Criar conta"}
+          </Button>
 
-        <p className="text-center text-sm text-muted">
-          Já tem conta?{" "}
-          <Link href="/entrar" className="font-medium text-foreground underline underline-offset-4">
-            Entrar
-          </Link>
-        </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Já tem conta?{" "}
+            <Link href="/entrar" className="font-medium text-foreground underline underline-offset-4">
+              Entrar
+            </Link>
+          </p>
+        </FieldGroup>
       </form>
     </div>
   );

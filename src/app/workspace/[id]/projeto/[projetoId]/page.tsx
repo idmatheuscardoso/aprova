@@ -42,7 +42,7 @@ export default async function ProjetoPage({
       <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted hover:text-foreground">
+          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
             Sair
           </button>
         </form>
@@ -52,7 +52,7 @@ export default async function ProjetoPage({
         <div>
           <Link
             href={`/workspace/${workspaceId}`}
-            className="text-sm text-muted hover:text-foreground"
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Voltar para o Workspace
           </Link>
@@ -60,7 +60,7 @@ export default async function ProjetoPage({
         </div>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted">Pastas</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Pastas</h2>
 
           {pastas && pastas.length > 0 ? (
             <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
@@ -76,12 +76,12 @@ export default async function ProjetoPage({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted">Nenhuma pasta ainda.</p>
+            <p className="text-sm text-muted-foreground">Nenhuma pasta ainda.</p>
           )}
         </section>
 
         <section className="flex flex-col gap-4 border-t border-border pt-8">
-          <h2 className="text-sm font-medium text-muted">Nova pasta</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Nova pasta</h2>
           <CriarPastaForm workspaceId={workspaceId} projectId={projetoId} />
         </section>
       </main>
