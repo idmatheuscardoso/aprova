@@ -1,21 +1,19 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
+      <header className="flex items-center justify-between border-b px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/entrar" className="text-muted-foreground hover:text-foreground">
+        <nav className="flex items-center gap-2 text-sm">
+          <Button variant="ghost" nativeButton={false} render={<Link href="/entrar" />}>
             Entrar
-          </Link>
-          <Link
-            href="/cadastro"
-            className="rounded-full bg-foreground px-4 py-2 font-medium text-background transition-colors hover:opacity-90"
-          >
+          </Button>
+          <Button nativeButton={false} render={<Link href="/cadastro" />}>
             Criar conta
-          </Link>
+          </Button>
         </nav>
       </header>
 
@@ -29,22 +27,16 @@ export default function Home() {
           e-mail, sem WhatsApp, sem PDF perdido.
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <Link
-            href="/cadastro"
-            className="rounded-full bg-foreground px-6 py-3 font-medium text-background transition-colors hover:opacity-90"
-          >
+          <Button size="lg" nativeButton={false} render={<Link href="/cadastro" />}>
             Começar agora
-          </Link>
-          <Link
-            href="/entrar"
-            className="rounded-full border border-border px-6 py-3 font-medium transition-colors hover:bg-black/[.03] dark:hover:bg-white/[.06]"
-          >
+          </Button>
+          <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/entrar" />}>
             Já tenho conta
-          </Link>
+          </Button>
         </div>
       </main>
 
-      <footer className="border-t border-border px-6 py-8 text-center text-sm text-muted-foreground sm:px-10">
+      <footer className="border-t px-6 py-8 text-center text-sm text-muted-foreground sm:px-10">
         <Logo className="text-base" /> — Aprovação sem enrolação.
       </footer>
     </div>
