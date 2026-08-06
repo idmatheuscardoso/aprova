@@ -108,6 +108,10 @@ access). Duas consequências práticas:
    pede ajuste com comentário na tela pública, podendo mudar de ideia
    depois; o dono vê o status e o comentário na tela da Pasta. É aqui que
    o estado "Aprovado" (verde) passa a ser usado de verdade.
+9. Painel de status no Workspace — contagem de Assets por status
+   (pendente/ajuste pedido/aprovado) no topo da tela do Workspace, somando
+   todos os Projetos/Pastas, com lista dos que ainda não foram aprovados
+   linkando direto pra Pasta de cada um.
 
 ### Em andamento
 8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste —
@@ -118,4 +122,5 @@ access). Duas consequências práticas:
    configurar `RESEND_FROM_EMAIL` pra destravar isso.
 
 ### Próximos passos (ainda não construído, ordem sugerida)
-9. Painel de status no Workspace (visão geral do que está aprovado/pendente).
+Nenhum item definido ainda além da Etapa 8 pendente acima — combinar o
+próximo passo com o dono do produto.
