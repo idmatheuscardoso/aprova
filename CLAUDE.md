@@ -32,10 +32,12 @@ acessa Supabase, Vercel, ou a maioria dos domínios externos sem que o dono
 do produto libere isso manualmente nas configurações do ambiente (network
 access). Duas consequências práticas:
 
-1. **Migrações do banco** (`supabase/migrations/*.sql`) precisam ser rodadas
-   manualmente pelo dono do produto no SQL Editor do Supabase — copiar o
-   conteúdo do arquivo, colar lá, rodar. Sempre dar esse passo a passo
-   depois de criar uma migração nova.
+1. **Migrações do banco**: aplicar sempre pelo conector do Supabase (MCP
+   `mcp__Supabase__apply_migration`, projeto `kyduyqnrrjilugvzyzgn`), não
+   pedindo pro dono colar SQL no SQL Editor. O arquivo `.sql` continua sendo
+   versionado em `supabase/migrations/` pra manter o histórico no repositório.
+   Depois de aplicar, conferir com `list_tables` e `get_advisors` (tipo
+   `security`) que a tabela nova não ficou sem RLS.
 2. **Testes de verdade** (login, upload, etc.) só o dono do produto consegue
    fazer, testando no navegador e reportando o resultado.
 
@@ -43,8 +45,10 @@ access). Duas consequências práticas:
 
 - Só 1 usuário dono por Workspace (sem múltiplos membros de equipe).
 - Acesso do cliente é só por link direto, sem login de cliente.
-- Sem desenho/anotação em cima da peça, sem múltiplas versões/comparação,
-  sem preview de código/site.
+- Sem múltiplas versões/comparação, sem preview de código/site.
+- ~~Sem desenho/anotação em cima da peça~~ — **destravado na Etapa 12**
+  (comentário ancorado num ponto da imagem). Continua sem desenho livre
+  (seta, retângulo, texto solto sobre a peça): o pin é a única marcação.
 
 ## Design system
 
@@ -118,6 +122,17 @@ access). Duas consequências práticas:
     `decided_by_name`/`decided_by_email`/`decided_at` no Asset (migração
     `0008`). O dono vê "Aprovado por Fulano em data" na tela da Pasta, e o
     e-mail de notificação passa a dizer quem decidiu.
+12. Viewer interno + comentário ancorado na peça (migração `0009`, tabela
+    `comments`). Duas rotas novas de visualização — `/aprovar/[token]/arquivo/[assetId]`
+    (cliente) e `.../pasta/[pastaId]/arquivo/[assetId]` (dono) — servidas pelo
+    mesmo componente em `src/components/visualizador/`, que recebe as server
+    actions por prop (service role de um lado, RLS do outro). Imagem com
+    zoom/pan próprio (sem dependência nova, `src/components/visualizador/use-zoom-pan.ts`)
+    e pin numerado clicando num ponto; PDF usa a mesma tela, sem pin, abrindo
+    em outra aba. O comentário virou o jeito de pedir ajuste: a caixa de texto
+    solta saiu, e "Pedir ajuste" exige pelo menos um comentário. O dono
+    responde em thread e marca como resolvido. O `assets.feedback` antigo
+    virou dado legado, exibido como primeiro comentário da lista.
 
 ### Em andamento
 8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste —
@@ -135,12 +150,11 @@ Filestage e GoVisually (ago/2026). Itens marcados com ⚠️ alteram a seção
 11. Destravar o e-mail (Etapa 8 acima) + prazos com lembrete automático —
     prazo opcional no link de aprovação e cobrança automática do cliente
     por e-mail perto do prazo.
-12. ⚠️ Viewer interno + comentário ancorado na peça — ver a imagem/PDF
-    dentro do app (zoom, páginas) e clicar num ponto pra deixar um
-    comentário pinado ali, com resposta do dono. É o coração das
-    ferramentas de proofing do mercado e o maior salto de valor.
 13. ⚠️ Versões — subir v2 de um Asset mantendo histórico; status e
     comentários por versão. Comparação lado a lado fica pra depois.
+    **Atenção**: mexe na tabela `comments` (vai precisar de
+    `asset_version_id`), porque um pin ancorado só faz sentido enquanto a
+    imagem for a mesma.
 14. Decisão em 3 níveis ("aprovado com ajustes") + botão "Aprovar tudo" +
     progresso da pasta na tela do cliente.
 
