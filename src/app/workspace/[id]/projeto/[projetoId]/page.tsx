@@ -1,7 +1,17 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { Folder } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { sair } from "../../../actions";
 import { CriarPastaForm } from "./criar-pasta-form";
 
@@ -39,12 +49,12 @@ export default async function ProjetoPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
+      <header className="flex items-center justify-between border-b px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
+          <Button type="submit" variant="ghost" size="sm">
             Sair
-          </button>
+          </Button>
         </form>
       </header>
 
@@ -63,24 +73,41 @@ export default async function ProjetoPage({
           <h2 className="text-sm font-medium text-muted-foreground">Pastas</h2>
 
           {pastas && pastas.length > 0 ? (
-            <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
+            <ItemGroup>
               {pastas.map((pasta) => (
-                <li key={pasta.id}>
-                  <Link
-                    href={`/workspace/${workspaceId}/projeto/${projetoId}/pasta/${pasta.id}`}
-                    className="block px-4 py-3 hover:bg-border/30"
-                  >
-                    {pasta.name}
-                  </Link>
-                </li>
+                <Item
+                  key={pasta.id}
+                  variant="outline"
+                  className="hover:bg-muted"
+                  render={
+                    <Link href={`/workspace/${workspaceId}/projeto/${projetoId}/pasta/${pasta.id}`} />
+                  }
+                >
+                  <ItemMedia variant="icon">
+                    <Folder />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{pasta.name}</ItemTitle>
+                  </ItemContent>
+                </Item>
               ))}
-            </ul>
+            </ItemGroup>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhuma pasta ainda.</p>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Folder />
+                </EmptyMedia>
+                <EmptyTitle>Nenhuma pasta ainda</EmptyTitle>
+                <EmptyDescription>
+                  Crie a primeira pasta para organizar o conteúdo deste projeto.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </section>
 
-        <section className="flex flex-col gap-4 border-t border-border pt-8">
+        <section className="flex flex-col gap-4 border-t pt-8">
           <h2 className="text-sm font-medium text-muted-foreground">Nova pasta</h2>
           <CriarPastaForm workspaceId={workspaceId} projectId={projetoId} />
         </section>

@@ -1,7 +1,25 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { sair } from "../../../../../actions";
 import { EnviarAssetForm } from "./enviar-asset-form";
 
@@ -56,12 +74,12 @@ export default async function PastaPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
+      <header className="flex items-center justify-between border-b px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
+          <Button type="submit" variant="ghost" size="sm">
             Sair
-          </button>
+          </Button>
         </form>
       </header>
 
@@ -80,46 +98,54 @@ export default async function PastaPage({
           <h2 className="text-sm font-medium text-muted-foreground">Arquivos</h2>
 
           {assetsComUrl.length > 0 ? (
-            <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
+            <ItemGroup>
               {assetsComUrl.map((asset) => (
-                <li key={asset.id} className="flex items-center gap-3 px-4 py-3">
+                <Item key={asset.id} variant="outline">
                   {asset.mime_type.startsWith("image/") && asset.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- miniatura de URL assinada dinâmica
-                    <img
-                      src={asset.url}
-                      alt=""
-                      className="h-12 w-12 rounded object-cover"
-                    />
+                    <ItemMedia variant="image">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- miniatura de URL assinada dinâmica */}
+                      <img src={asset.url} alt="" />
+                    </ItemMedia>
                   ) : (
-                    <span className="flex h-12 w-12 items-center justify-center rounded bg-border text-xs text-muted-foreground">
-                      PDF
-                    </span>
+                    <ItemMedia variant="icon">
+                      <FileText />
+                    </ItemMedia>
                   )}
-                  <div className="flex flex-1 flex-col">
-                    <span className="text-sm">{asset.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatarTamanho(asset.size_bytes)}
-                    </span>
-                  </div>
+                  <ItemContent>
+                    <ItemTitle>{asset.name}</ItemTitle>
+                    <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
+                  </ItemContent>
                   {asset.url && (
-                    <a
-                      href={asset.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm text-muted-foreground hover:text-foreground"
-                    >
-                      Ver
-                    </a>
+                    <ItemActions>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        nativeButton={false}
+                        render={<a href={asset.url} target="_blank" rel="noreferrer" />}
+                      >
+                        Ver
+                      </Button>
+                    </ItemActions>
                   )}
-                </li>
+                </Item>
               ))}
-            </ul>
+            </ItemGroup>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhum arquivo ainda.</p>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FileText />
+                </EmptyMedia>
+                <EmptyTitle>Nenhum arquivo ainda</EmptyTitle>
+                <EmptyDescription>
+                  Envie o primeiro arquivo para o cliente revisar.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </section>
 
-        <section className="flex flex-col gap-4 border-t border-border pt-8">
+        <section className="flex flex-col gap-4 border-t pt-8">
           <h2 className="text-sm font-medium text-muted-foreground">Enviar arquivo</h2>
           <EnviarAssetForm workspaceId={workspaceId} projectId={projetoId} folderId={pastaId} />
         </section>
