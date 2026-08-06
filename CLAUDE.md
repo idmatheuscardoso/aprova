@@ -109,6 +109,13 @@ access). Duas consequências práticas:
    depois; o dono vê o status e o comentário na tela da Pasta. É aqui que
    o estado "Aprovado" (verde) passa a ser usado de verdade.
 
+### Em andamento
+8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste —
+   código pronto (`src/lib/resend.ts`, chamado de `aprovar/[token]/actions.ts`),
+   mas a entrega real ainda não funciona: sem domínio verificado no Resend, o
+   envio usa o domínio de teste `onboarding@resend.dev`, que provedores como
+   Gmail costumam rejeitar. Falta verificar um domínio de verdade no Resend e
+   configurar `RESEND_FROM_EMAIL` pra destravar isso.
+
 ### Próximos passos (ainda não construído, ordem sugerida)
-8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste.
 9. Painel de status no Workspace (visão geral do que está aprovado/pendente).
