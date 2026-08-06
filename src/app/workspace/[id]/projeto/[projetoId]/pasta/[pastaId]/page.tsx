@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -50,12 +51,25 @@ export default async function PastaPage({
     redirect("/entrar");
   }
 
-  const { data: pasta } = await supabase
-    .from("folders")
-    .select("id, name, project_id, projects(id, name, workspace_id)")
-    .eq("id", pastaId)
-    .eq("project_id", projetoId)
-    .single();
+  const [{ data: pasta }, { data: assets }, { data: linkAprovacao }] = await Promise.all([
+    supabase
+      .from("folders")
+      .select("id, name, project_id, projects(id, name, workspace_id)")
+      .eq("id", pastaId)
+      .eq("project_id", projetoId)
+      .single(),
+    supabase
+      .from("assets")
+      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .eq("folder_id", pastaId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("approval_links")
+      .select("token")
+      .eq("folder_id", pastaId)
+      .eq("owner_id", user.id)
+      .maybeSingle(),
+  ]);
 
   const projeto = Array.isArray(pasta?.projects) ? pasta.projects[0] : pasta?.projects;
 
@@ -63,27 +77,20 @@ export default async function PastaPage({
     notFound();
   }
 
-  const { data: assets } = await supabase
-    .from("assets")
-    .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
-    .eq("folder_id", pastaId)
-    .order("created_at", { ascending: true });
+  const { data: signedUrls } =
+    assets && assets.length > 0
+      ? await supabase.storage
+          .from("assets")
+          .createSignedUrls(
+            assets.map((asset) => asset.storage_path),
+            3600,
+          )
+      : { data: null };
 
-  const assetsComUrl = await Promise.all(
-    (assets ?? []).map(async (asset) => {
-      const { data } = await supabase.storage
-        .from("assets")
-        .createSignedUrl(asset.storage_path, 3600);
-      return { ...asset, url: data?.signedUrl ?? null };
-    }),
-  );
-
-  const { data: linkAprovacao } = await supabase
-    .from("approval_links")
-    .select("token")
-    .eq("folder_id", pastaId)
-    .eq("owner_id", user.id)
-    .maybeSingle();
+  const assetsComUrl = (assets ?? []).map((asset) => {
+    const signed = signedUrls?.find((item) => item.path === asset.storage_path);
+    return { ...asset, url: signed?.signedUrl ?? null };
+  });
 
   const gerarLinkComParametros = gerarLinkAprovacao.bind(
     null,
@@ -152,8 +159,7 @@ export default async function PastaPage({
                 <Item key={asset.id} variant="outline">
                   {asset.mime_type.startsWith("image/") && asset.url ? (
                     <ItemMedia variant="image">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- miniatura de URL assinada dinâmica */}
-                      <img src={asset.url} alt="" />
+                      <Image src={asset.url} alt="" width={80} height={80} />
                     </ItemMedia>
                   ) : (
                     <ItemMedia variant="icon">

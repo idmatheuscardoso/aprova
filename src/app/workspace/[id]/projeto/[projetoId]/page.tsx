@@ -30,22 +30,23 @@ export default async function ProjetoPage({
     redirect("/entrar");
   }
 
-  const { data: projeto } = await supabase
-    .from("projects")
-    .select("id, name")
-    .eq("id", projetoId)
-    .eq("workspace_id", workspaceId)
-    .single();
+  const [{ data: projeto }, { data: pastas }] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, name")
+      .eq("id", projetoId)
+      .eq("workspace_id", workspaceId)
+      .single(),
+    supabase
+      .from("folders")
+      .select("id, name, created_at")
+      .eq("project_id", projetoId)
+      .order("created_at", { ascending: true }),
+  ]);
 
   if (!projeto) {
     notFound();
   }
-
-  const { data: pastas } = await supabase
-    .from("folders")
-    .select("id, name, created_at")
-    .eq("project_id", projetoId)
-    .order("created_at", { ascending: true });
 
   return (
     <div className="flex flex-1 flex-col">
