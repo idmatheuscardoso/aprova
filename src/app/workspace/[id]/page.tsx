@@ -45,7 +45,7 @@ export default async function WorkspacePage({
       <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <form action={sair}>
-          <button type="submit" className="text-sm text-muted hover:text-foreground">
+          <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
             Sair
           </button>
         </form>
@@ -53,12 +53,12 @@ export default async function WorkspacePage({
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-10 px-6 py-12">
         <div>
-          <p className="text-sm text-muted">{empresa?.name}</p>
+          <p className="text-sm text-muted-foreground">{empresa?.name}</p>
           <h1 className="text-2xl font-semibold tracking-tight">{workspace.name}</h1>
         </div>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted">Projetos</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Projetos</h2>
 
           {projetos && projetos.length > 0 ? (
             <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
@@ -74,12 +74,12 @@ export default async function WorkspacePage({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted">Nenhum projeto ainda.</p>
+            <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>
           )}
         </section>
 
         <section className="flex flex-col gap-4 border-t border-border pt-8">
-          <h2 className="text-sm font-medium text-muted">Novo projeto</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Novo projeto</h2>
           <CriarProjetoForm workspaceId={id} />
         </section>
       </main>

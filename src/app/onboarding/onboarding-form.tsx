@@ -13,7 +13,7 @@ export function OnboardingForm() {
       <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">
         <div>
           <h1 className="text-center text-xl font-semibold">Quase lá</h1>
-          <p className="mt-2 text-center text-sm text-muted">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Conte um pouco sobre sua empresa e crie seu primeiro Workspace.
           </p>
         </div>

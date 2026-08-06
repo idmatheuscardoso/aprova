@@ -7,7 +7,7 @@ export default function Home() {
       <header className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-10">
         <Logo className="text-xl" />
         <nav className="flex items-center gap-4 text-sm">
-          <Link href="/entrar" className="text-muted hover:text-foreground">
+          <Link href="/entrar" className="text-muted-foreground hover:text-foreground">
             Entrar
           </Link>
           <Link
@@ -23,7 +23,7 @@ export default function Home() {
         <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
           Do talvez ao aprovado.
         </h1>
-        <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
+        <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
           O Approva é onde seu cliente aprova, você entrega. Centralize a
           revisão e aprovação dos seus materiais em um só lugar — sem
           e-mail, sem WhatsApp, sem PDF perdido.
@@ -44,7 +44,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="border-t border-border px-6 py-8 text-center text-sm text-muted sm:px-10">
+      <footer className="border-t border-border px-6 py-8 text-center text-sm text-muted-foreground sm:px-10">
         <Logo className="text-base" /> — Aprovação sem enrolação.
       </footer>
     </div>

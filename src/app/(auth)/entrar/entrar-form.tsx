@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 
 export function EntrarForm() {
   const router = useRouter();
@@ -40,53 +45,53 @@ export function EntrarForm() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
       <Logo className="text-2xl" />
-      <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
-        <h1 className="text-center text-xl font-semibold">Entrar</h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-sm">
+        <FieldGroup>
+          <h1 className="text-center text-xl font-semibold">Entrar</h1>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm font-medium">
-            E-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-          />
-        </div>
+          {erro && (
+            <Alert
+              variant="destructive"
+              className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200 motion-safe:ease-snappy"
+            >
+              <AlertDescription>{erro}</AlertDescription>
+            </Alert>
+          )}
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="senha" className="text-sm font-medium">
-            Senha
-          </label>
-          <input
-            id="senha"
-            type="password"
-            required
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="rounded-lg border border-border bg-transparent px-3 py-2 outline-none focus:border-foreground"
-          />
-        </div>
+          <Field>
+            <FieldLabel htmlFor="email">E-mail</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
 
-        {erro && <p className="text-sm text-red-600">{erro}</p>}
+          <Field>
+            <FieldLabel htmlFor="senha">Senha</FieldLabel>
+            <Input
+              id="senha"
+              type="password"
+              required
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+          </Field>
 
-        <button
-          type="submit"
-          disabled={carregando}
-          className="mt-2 rounded-full bg-foreground px-6 py-3 font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
-        >
-          {carregando ? "Entrando..." : "Entrar"}
-        </button>
+          <Button type="submit" disabled={carregando} className="mt-2">
+            {carregando && <Spinner data-icon="inline-start" />}
+            {carregando ? "Entrando..." : "Entrar"}
+          </Button>
 
-        <p className="text-center text-sm text-muted">
-          Ainda não tem conta?{" "}
-          <Link href="/cadastro" className="font-medium text-foreground underline underline-offset-4">
-            Criar conta
-          </Link>
-        </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Ainda não tem conta?{" "}
+            <Link href="/cadastro" className="font-medium text-foreground underline underline-offset-4">
+              Criar conta
+            </Link>
+          </p>
+        </FieldGroup>
       </form>
     </div>
   );
