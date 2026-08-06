@@ -13,11 +13,13 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
+  ItemFooter,
   ItemGroup,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
 import { Button } from "@/components/ui/button";
+import { AssetApprovalActions } from "./asset-approval-actions";
 
 function formatarTamanho(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -81,7 +83,7 @@ export default async function AprovacaoPage({
 
   const { data: assets } = await supabase
     .from("assets")
-    .select("id, name, mime_type, size_bytes, storage_path, created_at")
+    .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
     .eq("folder_id", pasta.id)
     .order("created_at", { ascending: true });
 
@@ -139,6 +141,14 @@ export default async function AprovacaoPage({
                       </Button>
                     </ItemActions>
                   )}
+                  <ItemFooter>
+                    <AssetApprovalActions
+                      token={token}
+                      assetId={asset.id}
+                      status={asset.status}
+                      feedback={asset.feedback}
+                    />
+                  </ItemFooter>
                 </Item>
               ))}
             </ItemGroup>
