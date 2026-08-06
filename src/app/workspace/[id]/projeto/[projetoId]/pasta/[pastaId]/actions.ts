@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export type EnviarAssetState = { error?: string } | undefined;
@@ -78,4 +79,49 @@ export async function enviarAsset(
   }
 
   redirect(`/workspace/${workspaceId}/projeto/${projectId}/pasta/${folderId}`);
+}
+
+export async function gerarLinkAprovacao(
+  workspaceId: string,
+  projectId: string,
+  folderId: string,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/entrar");
+  }
+
+  const { data: pasta } = await supabase
+    .from("folders")
+    .select("id")
+    .eq("id", folderId)
+    .eq("owner_id", user.id)
+    .single();
+
+  if (!pasta) {
+    return;
+  }
+
+  const { data: linkExistente } = await supabase
+    .from("approval_links")
+    .select("id")
+    .eq("folder_id", folderId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  if (!linkExistente) {
+    await supabase.from("approval_links").insert({
+      folder_id: folderId,
+      owner_id: user.id,
+      token: crypto.randomUUID(),
+    });
+  }
+
+  revalidatePath(
+    `/workspace/${workspaceId}/projeto/${projectId}/pasta/${folderId}`,
+  );
 }
