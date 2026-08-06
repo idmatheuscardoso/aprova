@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/item";
 import { Input } from "@/components/ui/input";
 import { AssetStatusBadge } from "@/components/asset-status-badge";
+import { formatarDataHora } from "@/lib/datas";
 import { sair } from "../../../../../actions";
 import { EnviarAssetForm } from "./enviar-asset-form";
 import { gerarLinkAprovacao } from "./actions";
@@ -60,7 +61,9 @@ export default async function PastaPage({
       .single(),
     supabase
       .from("assets")
-      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .select(
+        "id, name, mime_type, size_bytes, storage_path, created_at, status, feedback, decided_by_name, decided_by_email, decided_at",
+      )
       .eq("folder_id", pastaId)
       .order("created_at", { ascending: true }),
     supabase
@@ -183,9 +186,22 @@ export default async function PastaPage({
                       </Button>
                     )}
                   </ItemActions>
-                  {asset.status === "ajuste_solicitado" && asset.feedback && (
+                  {(asset.decided_by_name ||
+                    (asset.status === "ajuste_solicitado" && asset.feedback)) && (
                     <ItemFooter>
-                      <p className="text-sm text-muted-foreground">{asset.feedback}</p>
+                      <div className="flex flex-col gap-1">
+                        {asset.status === "ajuste_solicitado" && asset.feedback && (
+                          <p className="text-sm text-muted-foreground">{asset.feedback}</p>
+                        )}
+                        {asset.decided_by_name && asset.decided_at && (
+                          <p className="text-sm text-muted-foreground">
+                            {asset.status === "aprovado" ? "Aprovado" : "Ajuste pedido"} por{" "}
+                            {asset.decided_by_name}
+                            {asset.decided_by_email ? ` (${asset.decided_by_email})` : ""} em{" "}
+                            {formatarDataHora(asset.decided_at)}
+                          </p>
+                        )}
+                      </div>
                     </ItemFooter>
                   )}
                 </Item>

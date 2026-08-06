@@ -20,7 +20,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Button } from "@/components/ui/button";
+import { formatarDataHora } from "@/lib/datas";
 import { AssetApprovalActions } from "./asset-approval-actions";
+import { RevisorProvider } from "./revisor";
 
 function formatarTamanho(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -78,7 +80,9 @@ export default async function AprovacaoPage({
       .maybeSingle(),
     supabase
       .from("assets")
-      .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
+      .select(
+        "id, name, mime_type, size_bytes, storage_path, created_at, status, feedback, decided_by_name, decided_at",
+      )
       .eq("folder_id", link.folder_id)
       .order("created_at", { ascending: true }),
   ]);
@@ -118,61 +122,68 @@ export default async function AprovacaoPage({
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">{pasta.name}</h1>
         </div>
 
-        <section className="flex flex-col gap-4">
-          {assetsComUrl.length > 0 ? (
-            <ItemGroup>
-              {assetsComUrl.map((asset) => (
-                <Item key={asset.id} variant="outline">
-                  {asset.mime_type.startsWith("image/") && asset.url ? (
-                    <ItemMedia variant="image">
-                      <Image src={asset.url} alt="" width={80} height={80} />
-                    </ItemMedia>
-                  ) : (
-                    <ItemMedia variant="icon">
-                      <FileText />
-                    </ItemMedia>
-                  )}
-                  <ItemContent>
-                    <ItemTitle>{asset.name}</ItemTitle>
-                    <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
-                  </ItemContent>
-                  {asset.url && (
-                    <ItemActions>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        nativeButton={false}
-                        render={<a href={asset.url} target="_blank" rel="noreferrer" />}
-                      >
-                        Ver
-                      </Button>
-                    </ItemActions>
-                  )}
-                  <ItemFooter>
-                    <AssetApprovalActions
-                      token={token}
-                      assetId={asset.id}
-                      status={asset.status}
-                      feedback={asset.feedback}
-                    />
-                  </ItemFooter>
-                </Item>
-              ))}
-            </ItemGroup>
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <FileText />
-                </EmptyMedia>
-                <EmptyTitle>Nenhum arquivo ainda</EmptyTitle>
-                <EmptyDescription>
-                  Ainda não há materiais para revisar nesta pasta.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </section>
+        <RevisorProvider>
+          <section className="flex flex-col gap-4">
+            {assetsComUrl.length > 0 ? (
+              <ItemGroup>
+                {assetsComUrl.map((asset) => (
+                  <Item key={asset.id} variant="outline">
+                    {asset.mime_type.startsWith("image/") && asset.url ? (
+                      <ItemMedia variant="image">
+                        <Image src={asset.url} alt="" width={80} height={80} />
+                      </ItemMedia>
+                    ) : (
+                      <ItemMedia variant="icon">
+                        <FileText />
+                      </ItemMedia>
+                    )}
+                    <ItemContent>
+                      <ItemTitle>{asset.name}</ItemTitle>
+                      <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
+                    </ItemContent>
+                    {asset.url && (
+                      <ItemActions>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          nativeButton={false}
+                          render={<a href={asset.url} target="_blank" rel="noreferrer" />}
+                        >
+                          Ver
+                        </Button>
+                      </ItemActions>
+                    )}
+                    <ItemFooter>
+                      <AssetApprovalActions
+                        token={token}
+                        assetId={asset.id}
+                        status={asset.status}
+                        feedback={asset.feedback}
+                        decisao={
+                          asset.decided_by_name && asset.decided_at
+                            ? `${asset.status === "aprovado" ? "Aprovado" : "Ajuste pedido"} por ${asset.decided_by_name} em ${formatarDataHora(asset.decided_at)}`
+                            : null
+                        }
+                      />
+                    </ItemFooter>
+                  </Item>
+                ))}
+              </ItemGroup>
+            ) : (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <FileText />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhum arquivo ainda</EmptyTitle>
+                  <EmptyDescription>
+                    Ainda não há materiais para revisar nesta pasta.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </section>
+        </RevisorProvider>
       </main>
     </div>
   );

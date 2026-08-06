@@ -79,14 +79,36 @@ async function notificarDono({
   await enviarEmail({ to: email, subject: assunto, html });
 }
 
-export async function aprovarAsset(token: string, assetId: string) {
+function dadosDoRevisor(formData: FormData) {
+  const nome = formData.get("revisor_nome");
+  const email = formData.get("revisor_email");
+  return {
+    nome: typeof nome === "string" && nome.trim() !== "" ? nome.trim() : null,
+    email: typeof email === "string" && email.trim() !== "" ? email.trim() : null,
+  };
+}
+
+export async function aprovarAsset(
+  token: string,
+  assetId: string,
+  formData: FormData,
+) {
+  const revisor = dadosDoRevisor(formData);
+  if (!revisor.nome) return;
+
   const contexto = await contextoDoToken(token);
   if (!contexto) return;
 
   const supabase = createAdminClient();
   const { data: asset } = await supabase
     .from("assets")
-    .update({ status: "aprovado", feedback: null })
+    .update({
+      status: "aprovado",
+      feedback: null,
+      decided_by_name: revisor.nome,
+      decided_by_email: revisor.email,
+      decided_at: new Date().toISOString(),
+    })
     .eq("id", assetId)
     .eq("folder_id", contexto.folderId)
     .select("name")
@@ -97,7 +119,7 @@ export async function aprovarAsset(token: string, assetId: string) {
       ownerId: contexto.ownerId,
       assunto: `Aprovado: ${asset.name}`,
       linhas: [
-        `O cliente aprovou o arquivo <strong>${escaparHtml(asset.name)}</strong> na pasta ${escaparHtml(contexto.folderName)}.`,
+        `<strong>${escaparHtml(revisor.nome)}</strong> aprovou o arquivo <strong>${escaparHtml(asset.name)}</strong> na pasta ${escaparHtml(contexto.folderName)}.`,
       ],
       workspaceId: contexto.workspaceId,
       projectId: contexto.projectId,
@@ -122,6 +144,11 @@ export async function pedirAjusteAsset(
     return { error: "Escreva o que precisa mudar." };
   }
 
+  const revisor = dadosDoRevisor(formData);
+  if (!revisor.nome) {
+    return { error: "Preencha seu nome no topo da página antes de decidir." };
+  }
+
   const contexto = await contextoDoToken(token);
   if (!contexto) {
     return { error: "Link inválido." };
@@ -130,7 +157,13 @@ export async function pedirAjusteAsset(
   const supabase = createAdminClient();
   const { data: asset } = await supabase
     .from("assets")
-    .update({ status: "ajuste_solicitado", feedback: feedback.trim() })
+    .update({
+      status: "ajuste_solicitado",
+      feedback: feedback.trim(),
+      decided_by_name: revisor.nome,
+      decided_by_email: revisor.email,
+      decided_at: new Date().toISOString(),
+    })
     .eq("id", assetId)
     .eq("folder_id", contexto.folderId)
     .select("name")
@@ -141,7 +174,7 @@ export async function pedirAjusteAsset(
       ownerId: contexto.ownerId,
       assunto: `Ajuste pedido: ${asset.name}`,
       linhas: [
-        `O cliente pediu um ajuste no arquivo <strong>${escaparHtml(asset.name)}</strong> na pasta ${escaparHtml(contexto.folderName)}:`,
+        `<strong>${escaparHtml(revisor.nome)}</strong> pediu um ajuste no arquivo <strong>${escaparHtml(asset.name)}</strong> na pasta ${escaparHtml(contexto.folderName)}:`,
         escaparHtml(feedback.trim()),
       ],
       workspaceId: contexto.workspaceId,

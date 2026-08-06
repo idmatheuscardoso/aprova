@@ -112,6 +112,12 @@ access). Duas consequências práticas:
    (pendente/ajuste pedido/aprovado) no topo da tela do Workspace, somando
    todos os Projetos/Pastas, com lista dos que ainda não foram aprovados
    linkando direto pra Pasta de cada um.
+10. Identificação do cliente + registro de decisão — a tela pública pede o
+    nome (e e-mail opcional) do revisor antes de permitir aprovar/pedir
+    ajuste (guardado no navegador dele), e cada decisão grava
+    `decided_by_name`/`decided_by_email`/`decided_at` no Asset (migração
+    `0008`). O dono vê "Aprovado por Fulano em data" na tela da Pasta, e o
+    e-mail de notificação passa a dizer quem decidiu.
 
 ### Em andamento
 8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste —
@@ -122,5 +128,22 @@ access). Duas consequências práticas:
    configurar `RESEND_FROM_EMAIL` pra destravar isso.
 
 ### Próximos passos (ainda não construído, ordem sugerida)
-Nenhum item definido ainda além da Etapa 8 pendente acima — combinar o
-próximo passo com o dono do produto.
+Roadmap da Fase 2, definido a partir de benchmark com Ziflow, PageProof,
+Filestage e GoVisually (ago/2026). Itens marcados com ⚠️ alteram a seção
+"Decisões do MVP" acima — **confirmar com o dono antes de começar cada um**:
+
+11. Destravar o e-mail (Etapa 8 acima) + prazos com lembrete automático —
+    prazo opcional no link de aprovação e cobrança automática do cliente
+    por e-mail perto do prazo.
+12. ⚠️ Viewer interno + comentário ancorado na peça — ver a imagem/PDF
+    dentro do app (zoom, páginas) e clicar num ponto pra deixar um
+    comentário pinado ali, com resposta do dono. É o coração das
+    ferramentas de proofing do mercado e o maior salto de valor.
+13. ⚠️ Versões — subir v2 de um Asset mantendo histórico; status e
+    comentários por versão. Comparação lado a lado fica pra depois.
+14. Decisão em 3 níveis ("aprovado com ajustes") + botão "Aprovar tudo" +
+    progresso da pasta na tela do cliente.
+
+Fase 3 (mais adiante): vídeo com comentário por timestamp, logo/cor da
+agência na tela do cliente, múltiplos membros por Workspace, workflow em
+2 etapas (revisão interna → cliente), IA.
