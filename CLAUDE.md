@@ -99,11 +99,13 @@ access). Duas consequências práticas:
    no Supabase Storage com URL assinada.
 5. Base do shadcn/ui instalada e todo o app (7 telas) migrado para os
    componentes oficiais.
+6. Link de aprovação do cliente — tela pública (sem login, `/aprovar/[token]`)
+   mostrando os Assets de uma Pasta, com botão de gerar/copiar o link na
+   tela da Pasta. Usa tabela `approval_links` + client Supabase com a
+   chave secret/service role no servidor pra ler sem sessão de usuário.
 
 ### Próximos passos (ainda não construído, ordem sugerida)
-5. Link de aprovação do cliente — tela pública (sem login) mostrando os
-   Assets de uma Pasta/Projeto.
-6. Ação de aprovar/pedir ajuste por Asset — é aqui que o estado "Aprovado"
+7. Ação de aprovar/pedir ajuste por Asset — é aqui que o estado "Aprovado"
    (verde) passa a ser usado de verdade.
-7. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste.
-8. Painel de status no Workspace (visão geral do que está aprovado/pendente).
+8. Notificação por e-mail (Resend) quando o cliente aprova ou pede ajuste.
+9. Painel de status no Workspace (visão geral do que está aprovado/pendente).
