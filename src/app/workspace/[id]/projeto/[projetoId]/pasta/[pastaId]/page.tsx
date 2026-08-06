@@ -17,11 +17,13 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
+  ItemFooter,
   ItemGroup,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
 import { Input } from "@/components/ui/input";
+import { AssetStatusBadge } from "@/components/asset-status-badge";
 import { sair } from "../../../../../actions";
 import { EnviarAssetForm } from "./enviar-asset-form";
 import { gerarLinkAprovacao } from "./actions";
@@ -63,7 +65,7 @@ export default async function PastaPage({
 
   const { data: assets } = await supabase
     .from("assets")
-    .select("id, name, mime_type, size_bytes, storage_path, created_at")
+    .select("id, name, mime_type, size_bytes, storage_path, created_at, status, feedback")
     .eq("folder_id", pastaId)
     .order("created_at", { ascending: true });
 
@@ -162,8 +164,9 @@ export default async function PastaPage({
                     <ItemTitle>{asset.name}</ItemTitle>
                     <ItemDescription>{formatarTamanho(asset.size_bytes)}</ItemDescription>
                   </ItemContent>
-                  {asset.url && (
-                    <ItemActions>
+                  <ItemActions>
+                    <AssetStatusBadge status={asset.status} />
+                    {asset.url && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -172,7 +175,12 @@ export default async function PastaPage({
                       >
                         Ver
                       </Button>
-                    </ItemActions>
+                    )}
+                  </ItemActions>
+                  {asset.status === "ajuste_solicitado" && asset.feedback && (
+                    <ItemFooter>
+                      <p className="text-sm text-muted-foreground">{asset.feedback}</p>
+                    </ItemFooter>
                   )}
                 </Item>
               ))}
