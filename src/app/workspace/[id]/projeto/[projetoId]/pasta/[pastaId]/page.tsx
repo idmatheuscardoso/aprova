@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -20,8 +21,11 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { Input } from "@/components/ui/input";
 import { sair } from "../../../../../actions";
 import { EnviarAssetForm } from "./enviar-asset-form";
+import { gerarLinkAprovacao } from "./actions";
+import { CopiarLinkButton } from "./copiar-link-button";
 
 function formatarTamanho(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -72,6 +76,24 @@ export default async function PastaPage({
     }),
   );
 
+  const { data: linkAprovacao } = await supabase
+    .from("approval_links")
+    .select("token")
+    .eq("folder_id", pastaId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  const gerarLinkComParametros = gerarLinkAprovacao.bind(
+    null,
+    workspaceId,
+    projetoId,
+    pastaId,
+  );
+
+  const headersList = await headers();
+  const origem = `${headersList.get("x-forwarded-proto") ?? "https"}://${headersList.get("host")}`;
+  const urlAprovacao = linkAprovacao ? `${origem}/aprovar/${linkAprovacao.token}` : null;
+
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4 sm:px-10">
@@ -93,6 +115,31 @@ export default async function PastaPage({
           </Link>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">{pasta.name}</h1>
         </div>
+
+        <section className="flex flex-col gap-4 rounded-lg border p-4">
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Link de aprovação
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Compartilhe este link com o cliente. Ele abre sem precisar de
+              login.
+            </p>
+          </div>
+
+          {urlAprovacao ? (
+            <div className="flex items-center gap-2">
+              <Input readOnly value={urlAprovacao} />
+              <CopiarLinkButton url={urlAprovacao} />
+            </div>
+          ) : (
+            <form action={gerarLinkComParametros}>
+              <Button type="submit" variant="outline" size="sm">
+                Gerar link de aprovação
+              </Button>
+            </form>
+          )}
+        </section>
 
         <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground">Arquivos</h2>
